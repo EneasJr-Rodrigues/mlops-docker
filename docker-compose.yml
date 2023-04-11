@@ -1,0 +1,25 @@
+version: '3'
+services:
+  mlops:
+    build:
+      context: .
+      args:
+        config_path: config/$ENV
+        base_image: jupyter/datascience-notebook
+    container_name: mlflow-container
+    user: root
+    image: ml/$SERVICE
+    working_dir: /opt/ml/$SERVICE
+    env_file:
+      - config/$ENV/.env
+#      - .env
+    ports:
+      - ${JUPYTER_PORT-8089}:${JUPYTER_PORT-8089}
+    volumes:
+      - .:/opt/ml/$SERVICE
+      - .:/src # Used by pre-commit on pytest step
+      - ./config/$ENV:/home/jovyan/ml
+      - ./datalake:/datalake
+      - ./datalake/scikit_learn_data:/home/jovyan/scikit_learn_data
+      - ./config/$ENV:/opt/ml/mlops/configs/cluster/
+    entrypoint: ./config/$ENV/actions/run.sh
